@@ -90,7 +90,7 @@ class Tag extends Model
 php artisan make:migration add_category_id_to_tasks_table --table=tasks
 ```
 ### Далее откроем файл миграции, и добавим в структуру таблицы поле category_id и внешний ключ:
-```
+```php
 public function up()
 {
     Schema::table('tasks', function (Blueprint $table) {
@@ -112,7 +112,7 @@ public function down()
 php artisan make:migration create_task_tag_table
 ```
 ### Далее откроем файл миграции,и добавим структуру для связи задачи и тега:
-```
+```php
 public function up()
 {
     Schema::create('task_tag', function (Blueprint $table) {
@@ -137,7 +137,7 @@ public function down()
 
 ## №4. Связи между моделями
 ### Добавьте отношения в модель Category (Категория может иметь много задач)
-```
+```php
 // app/Models/Category.php
 
 namespace App\Models;
@@ -157,7 +157,7 @@ class Category extends Model
 }
 ```
 ### Добавьте отношения в модель Task
-```
+```php
 // app/Models/Task.php
 
 namespace App\Models;
@@ -184,7 +184,7 @@ class Task extends Model
 ```
 
 ### Добавьте отношения в модель Tag (Тег может быть прикреплен к многим задачам)
-```
+```php
 // app/Models/Tag.php
 
 namespace App\Models;
@@ -209,7 +209,7 @@ class Tag extends Model
 php artisan make:factory CategoryFactory --model=Category
 ```
 ### Далее определим структуру для генерации категорий
-```
+```php
 // database/factories/CategoryFactory.php
 
 namespace Database\Factories;
@@ -239,7 +239,7 @@ php artisan make:factory TaskFactory --model=Task
 ```
 
 Откроем файл фабрики database/factories/TaskFactory.php и определим структуру данных:
-```
+```php
 namespace Database\Factories;
 
 use App\Models\Task;
@@ -267,7 +267,7 @@ class TaskFactory extends Factory
 php artisan make:factory TagFactory --model=Tag
 ```
 Откроем файл фабрики database/factories/TagFactory.php и определим структуру данных:
-```
+```php
 namespace Database\Factories;
 
 use App\Models\Tag;
@@ -293,7 +293,7 @@ class TagFactory extends Factory
 php artisan make:seeder CategorySeeder
 ```
 Откроем файл database/seeders/CategorySeeder.php и добавим код для заполнения таблицы категориями:
-```
+```php
 namespace Database\Seeders;
 
 use App\Models\Category;
@@ -314,7 +314,7 @@ class CategorySeeder extends Seeder
 php artisan make:seeder TaskSeeder
 ```
 Откроем файл database/seeders/TaskSeeder.php и добавим код для заполнения таблицы задачами:
-```
+```php
 namespace Database\Seeders;
 
 use App\Models\Task;
@@ -335,7 +335,7 @@ class TaskSeeder extends Seeder
 php artisan make:seeder TagSeeder
 ```
 Откроем файл database/seeders/TagSeeder.php и добавим код для заполнения таблицы тегами:
-```
+```php
 namespace Database\Seeders;
 
 use App\Models\Tag;
@@ -353,7 +353,7 @@ class TagSeeder extends Seeder
 ## 3. Обновление DatabaseSeeder
 
 Откроем файл database/seeders/DatabaseSeeder.php и добавим вызов всех созданных сидеров:
-```
+```php
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
@@ -376,3 +376,4 @@ class DatabaseSeeder extends Seeder
 ```
 php artisan db:seed
 ```
+![image](https://github.com/user-attachments/assets/3e5f861f-99e7-4cc9-84c7-1403b9c031b9)
