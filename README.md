@@ -586,3 +586,8 @@ public function destroy($id)
     return redirect()->route('tasks.index');
 }
 ```
+![image](https://github.com/user-attachments/assets/59c455f2-76b5-42f3-813b-6db89bbc5ac5)
+
+![image](https://github.com/user-attachments/assets/034a53e9-07be-405f-995f-1dcb4c7c8ed5)
+
+![image](https://github.com/user-attachments/assets/e72bd31b-02d7-44a9-a01f-5425851624da)
