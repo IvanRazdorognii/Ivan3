@@ -1,3 +1,4 @@
+
 # Лабораторная работа №3. Основы работы с базами данных в Laravel
 # Цель работы
 Познакомиться с основными принципами работы с базами данных в Laravel. Научиться создавать миграции, модели и сиды на основе веб-приложения To-Do App.
@@ -350,7 +351,7 @@ class TagSeeder extends Seeder
     }
 }
 ```
-## 3. Обновление DatabaseSeeder
+### 3. Обновление DatabaseSeeder
 
 Откроем файл database/seeders/DatabaseSeeder.php и добавим вызов всех созданных сидеров:
 ```php
@@ -371,9 +372,217 @@ class DatabaseSeeder extends Seeder
     }
 }
 ```
-## 4. Запуск сидеров
+### 4. Запуск сидеров
 После того как все сидеры созданы, выполним команду для заполнения таблиц начальными данными:
 ```
 php artisan db:seed
 ```
 ![image](https://github.com/user-attachments/assets/3e5f861f-99e7-4cc9-84c7-1403b9c031b9)
+
+## №6. Работа с контроллерами и представлениями
+### Откройте контроллер TaskController (app/Http/Controllers/TaskController.php).
+Обновите метод index для получения списка задач из базы данных.
+```php
+// app/Http/Controllers/TaskController.php
+
+namespace App\Http\Controllers;
+
+use App\Models\Task;
+
+class TaskController extends Controller
+{
+    public function index()
+    {
+        // Получаем все задачи с категориями и тегами
+        $tasks = Task::with(['category', 'tags'])->get();
+        
+        return view('tasks.index', compact('tasks'));
+    }
+}
+
+```
+### 2. Обновление метода show
+```php
+public function show($id)
+{
+    // Получаем задачу с категорией и тегами по её ID
+    $task = Task::with(['category', 'tags'])->findOrFail($id);
+
+    return view('tasks.show', compact('task'));
+}
+```
+### 3. Обновление представлений
+tasks/index.blade.php — Список задач
+В этом представлении отобразим список всех задач и их категории и теги.
+```
+@extends('layouts.app')
+
+@section('content')
+    <h1>Список задач</h1>
+
+    <ul>
+        @foreach($tasks as $task)
+            <li>
+                <h3>{{ $task->title }}</h3>
+                <p>Категория: {{ $task->category->name }}</p>
+                <p>Теги: 
+                    @foreach($task->tags as $tag)
+                        <span>{{ $tag->name }}</span>
+                    @endforeach
+                </p>
+                <a href="{{ route('tasks.show', $task->id) }}">Просмотреть задачу</a>
+            </li>
+        @endforeach
+    </ul>
+@endsection
+```
+### tasks/show.blade.php — Просмотр отдельной задачи
+В этом представлении отобразим детальную информацию о задаче.
+``` php
+@extends('layouts.app')
+
+@section('content')
+    <h1>{{ $task->title }}</h1>
+    <p>Описание: {{ $task->description }}</p>
+    <p>Категория: {{ $task->category->name }}</p>
+    <p>Теги: 
+        @foreach($task->tags as $tag)
+            <span>{{ $tag->name }}</span>
+        @endforeach
+    </p>
+    <a href="{{ route('tasks.edit', $task->id) }}">Редактировать</a>
+@endsection
+```
+### 4. Обновление метода create для отображения формы создания задачи
+Метод create должен отображать форму для создания задачи.
+```php
+public function create()
+{
+    return view('tasks.create');
+}
+```
+### Форма для создания задачи (например, в tasks/create.blade.php)
+```php
+@extends('layouts.app')
+
+@section('content')
+    <h1>Создание задачи</h1>
+
+    <form action="{{ route('tasks.store') }}" method="POST">
+        @csrf
+        <label for="title">Название задачи:</label>
+        <input type="text" name="title" id="title" required>
+        
+        <label for="description">Описание задачи:</label>
+        <textarea name="description" id="description" required></textarea>
+
+        <label for="category_id">Категория:</label>
+        <select name="category_id" id="category_id">
+            <!-- Сюда нужно добавить все категории -->
+        </select>
+
+        <label for="tags">Теги:</label>
+        <input type="text" name="tags" id="tags">
+
+        <button type="submit">Создать задачу</button>
+    </form>
+@endsection
+```
+### 5. Обновление метода store для сохранения задачи
+Метод store должен сохранять новую задачу в базе данных.
+``` php
+public function store(Request $request)
+{
+    // Валидация данных
+    $request->validate([
+        'title' => 'required|string|max:255',
+        'description' => 'required|string',
+        'category_id' => 'required|exists:categories,id',
+    ]);
+
+    // Сохранение задачи
+    $task = Task::create([
+        'title' => $request->input('title'),
+        'description' => $request->input('description'),
+        'category_id' => $request->input('category_id'),
+    ]);
+
+    // Привязка тегов
+    $task->tags()->sync($request->input('tags'));
+
+    return redirect()->route('tasks.index');
+}
+```
+### 6. Обновление метода edit для отображения формы редактирования задачи
+Метод edit должен показывать форму для редактирования задачи.
+``` php
+public function edit($id)
+{
+    $task = Task::findOrFail($id);
+    return view('tasks.edit', compact('task'));
+}
+```
+### Форма для редактирования задачи (например, в tasks/edit.blade.php)
+```php
+@extends('layouts.app')
+
+@section('content')
+    <h1>Редактирование задачи</h1>
+
+    <form action="{{ route('tasks.update', $task->id) }}" method="POST">
+        @csrf
+        @method('PUT')
+
+        <label for="title">Название задачи:</label>
+        <input type="text" name="title" id="title" value="{{ $task->title }}" required>
+        
+        <label for="description">Описание задачи:</label>
+        <textarea name="description" id="description" required>{{ $task->description }}</textarea>
+
+        <label for="category_id">Категория:</label>
+        <select name="category_id" id="category_id">
+            <!-- Сюда нужно добавить все категории -->
+        </select>
+
+        <label for="tags">Теги:</label>
+        <input type="text" name="tags" id="tags" value="{{ $task->tags->pluck('name')->implode(', ') }}">
+
+        <button type="submit">Сохранить изменения</button>
+    </form>
+@endsection
+```
+### 7. Обновление метода update для сохранения изменений
+Метод update должен сохранять изменения в базе данных.
+``` php
+public function update(Request $request, $id)
+{
+    $task = Task::findOrFail($id);
+
+    $request->validate([
+        'title' => 'required|string|max:255',
+        'description' => 'required|string',
+        'category_id' => 'required|exists:categories,id',
+    ]);
+
+    $task->update([
+        'title' => $request->input('title'),
+        'description' => $request->input('description'),
+        'category_id' => $request->input('category_id'),
+    ]);
+
+    $task->tags()->sync($request->input('tags'));
+
+    return redirect()->route('tasks.index');
+}
+```
+### 8. Обновление метода destroy для удаления задачи
+Метод destroy должен удалять задачу из базы данных.
+```php
+public function destroy($id)
+{
+    $task = Task::findOrFail($id);
+    $task->delete();
+
+    return redirect()->route('tasks.index');
+}
+```
